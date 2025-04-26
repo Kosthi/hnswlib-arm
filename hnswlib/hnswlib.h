@@ -20,6 +20,12 @@
 #endif
 #endif
 
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
+#ifndef USE_NEON
+#define USE_NEON
+#endif
+#endif
+
 #if defined(USE_AVX) || defined(USE_SSE)
 #ifdef _MSC_VER
 #include <intrin.h>

@@ -8,7 +8,7 @@ import setuptools
 from setuptools import Extension, setup
 from setuptools.command.build_ext import build_ext
 
-__version__ = '0.8.0'
+__version__ = '0.8.1'
 
 
 include_dirs = [
@@ -104,7 +104,7 @@ class BuildExt(build_ext):
             if not os.environ.get("HNSWLIB_NO_NATIVE"):
                 # check that native flag is available
                 print('checking avalability of flag:', BuildExt.compiler_flag_native)
-                if not has_flag(self.compiler, BuildExt.compiler_flag_native):
+                if not has_flag(self.compiler, BuildExt.compiler_flag_native) or sys.platform == 'darwin':
                     print('removing unsupported compiler flag:', BuildExt.compiler_flag_native)
                     opts.remove(BuildExt.compiler_flag_native)
                     # for macos add apple-m1 flag if it's available
