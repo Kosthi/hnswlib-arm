@@ -10,6 +10,7 @@
 #include <unordered_set>
 
 #include "hnswlib.h"
+#include "memmove_heap.h"
 #include "visited_list_pool.h"
 
 namespace hnswlib {
@@ -307,9 +308,10 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
   // bare_bone_search means there is no check for deletions and stop condition
   // is ignored in return of extra performance
   template <bool bare_bone_search = true, bool collect_metrics = false>
-  std::priority_queue<std::pair<dist_t, tableint>,
-                      std::vector<std::pair<dist_t, tableint>>, CompareByFirst>
-  searchBaseLayerST(
+  // std::priority_queue<std::pair<dist_t, tableint>,
+  //                     std::vector<std::pair<dist_t, tableint>>,
+  //                     CompareByFirst>
+  auto searchBaseLayerST(
       tableint ep_id, const void* data_point, size_t ef,
       BaseFilterFunctor* isIdAllowed = nullptr,
       BaseSearchStopCondition<dist_t>* stop_condition = nullptr) const {
@@ -317,14 +319,18 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
     vl_type* visited_array = vl->mass;
     vl_type visited_array_tag = vl->curV;
 
-    std::priority_queue<std::pair<dist_t, tableint>,
-                        std::vector<std::pair<dist_t, tableint>>,
-                        CompareByFirst>
-        top_candidates;
-    std::priority_queue<std::pair<dist_t, tableint>,
-                        std::vector<std::pair<dist_t, tableint>>,
-                        CompareByFirst>
-        candidate_set;
+    // std::priority_queue<std::pair<dist_t, tableint>,
+    //                     std::vector<std::pair<dist_t, tableint>>,
+    //                     CompareByFirst>
+    //     top_candidates;
+    //
+    // std::priority_queue<std::pair<dist_t, tableint>,
+    //                    std::vector<std::pair<dist_t, tableint>>,
+    //                    CompareByFirst>
+    //    candidate_set;
+
+    MemmoveHeap<true, true> top_candidates(200);
+    MemmoveHeap<true, true> candidate_set(400);
 
     dist_t lowerBound;
     if (bare_bone_search ||
@@ -1385,10 +1391,13 @@ class HierarchicalNSW : public AlgorithmInterface<dist_t> {
       }
     }
 
-    std::priority_queue<std::pair<dist_t, tableint>,
-                        std::vector<std::pair<dist_t, tableint>>,
-                        CompareByFirst>
-        top_candidates;
+    MemmoveHeap<true, true> top_candidates(50);
+
+    // std::priority_queue<std::pair<dist_t, tableint>,
+    //                     std::vector<std::pair<dist_t, tableint>>,
+    //                     CompareByFirst>
+    //     top_candidates;
+
     bool bare_bone_search = !num_deleted_ && !isIdAllowed;
     if (bare_bone_search) {
       top_candidates = searchBaseLayerST<true>(currObj, query_data,
